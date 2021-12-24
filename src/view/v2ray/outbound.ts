@@ -696,6 +696,7 @@ return L.view.extend<string[]>({
     o.value("http", "HTTP/2");
     o.value("domainsocket", "Domain Socket");
     o.value("quic", "QUIC");
+    o.value("grpc", "gRPC"); // add gRPC
 
     o = s.taboption("stream", form.ListValue, "ss_security", _("Security"));
     o.modalonly = true;
@@ -1081,6 +1082,61 @@ return L.view.extend<string[]>({
     o.value("wechat-video", _("Wechat Video"));
     o.value("dtls", "DTLS 1.2");
     o.value("wireguard", "WireGuard");
+
+    // Stream Settings - gRPC
+    o = s.taboption(
+      "stream",
+      form.Value,
+      "service_name",
+      "%s - %s".format("gRPC", _("Service name"))
+    );
+    o.modalonly = true;
+    o.depends("ss_network", "grpc");
+
+    o = s.taboption(
+      "stream",
+      form.Flag,
+      "multi_mode",
+      "%s - %s".format("gRPC", _("Multi mode"))
+    );
+    o.modalonly = true;
+    o.depends("ss_network", "grpc");
+
+    o = s.taboption(
+      "stream",
+      form.Value,
+      "idle_timeout",
+      "%s - %s".format("gRPC", _("Idle timeout"))
+    );
+    o.datatype = "uinteger";
+    o.depends("ss_network", "grpc");
+
+    o = s.taboption(
+      "stream",
+      form.Value,
+      "health_check_timeout",
+      "%s - %s".format("gRPC", _("Health check timeout"))
+    );
+    o.datatype = "uinteger";
+    o.depends("ss_network", "grpc");
+
+    o = s.taboption(
+      "stream",
+      form.Flag,
+      "permit_without_stream",
+      "%s - %s".format("gRPC", _("Permit without stream"))
+    );
+    o.modalonly = true;
+    o.depends("ss_network", "grpc");
+
+    o = s.taboption(
+      "stream",
+      form.Value,
+      "initial_windows_size",
+      "%s - %s".format("gRPC", _("Initial windows size"))
+    );
+    o.datatype = "uinteger";
+    o.depends("ss_network", "grpc");
 
     // Stream Settings - Socket Options
     o = s.taboption(
