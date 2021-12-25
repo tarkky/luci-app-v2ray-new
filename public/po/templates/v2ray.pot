@@ -43,7 +43,7 @@ msgstr ""
 
 #: package/htdocs/luci-static/resources/view/v2ray/inbound.js:400
 #: package/htdocs/luci-static/resources/view/v2ray/outbound.js:500
-msgid "XTLS Flow"
+msgid "xTLS Flow"
 msgstr ""
 
 #: package/htdocs/luci-static/resources/view/v2ray/inbound.js:271
@@ -262,7 +262,7 @@ msgstr ""
 
 #: package/htdocs/luci-static/resources/view/v2ray/inbound.js:188
 #: package/htdocs/luci-static/resources/view/v2ray/outbound.js:188
-msgid "Use XTLS mode in VLESS protocol"
+msgid "Use xTLS mode in protocol"
 msgstr ""
 
 #: package/htdocs/luci-static/resources/view/v2ray/inbound.js:185

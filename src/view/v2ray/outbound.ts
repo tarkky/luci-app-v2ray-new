@@ -270,7 +270,6 @@ return L.view.extend<string[]>({
     }
 
     o = s.taboption("general", form.ListValue, "protocol", _("Protocol"));
-    o.modalonly = true;
     o.value("blackhole", "Blackhole");
     o.value("dns", "DNS");
     o.value("freedom", "Freedom");
@@ -700,7 +699,6 @@ return L.view.extend<string[]>({
 
     o = s.taboption("stream", form.ListValue, "ss_security", _("Security"));
     o.modalonly = true;
-    o.value("");
     o.value("none", _("None"));
     o.value("tls", "TLS");
 
@@ -709,8 +707,8 @@ return L.view.extend<string[]>({
       "stream",
       form.ListValue,
       "s_xtls_flow",
-      _("XTLS Flow"),
-      _("Use XTLS mode in VLESS protocol")
+      _("xTLS Flow"),
+      _("Use xTLS mode in protocol")
     );
     o.modalonly = true;
     o.value("none", _("None"));
@@ -1090,9 +1088,8 @@ return L.view.extend<string[]>({
       "service_name",
       "%s - %s".format("gRPC", _("Service name"))
     );
-    o.modalonly = true;
     o.depends("ss_network", "grpc");
-
+    o.modalonly = true;
     o = s.taboption(
       "stream",
       form.Flag,
@@ -1108,6 +1105,7 @@ return L.view.extend<string[]>({
       "idle_timeout",
       "%s - %s".format("gRPC", _("Idle timeout"))
     );
+    o.modalonly = true;
     o.datatype = "uinteger";
     o.depends("ss_network", "grpc");
 
@@ -1117,6 +1115,7 @@ return L.view.extend<string[]>({
       "health_check_timeout",
       "%s - %s".format("gRPC", _("Health check timeout"))
     );
+    o.modalonly = true;
     o.datatype = "uinteger";
     o.depends("ss_network", "grpc");
 
@@ -1135,6 +1134,7 @@ return L.view.extend<string[]>({
       "initial_windows_size",
       "%s - %s".format("gRPC", _("Initial windows size"))
     );
+    o.modalonly = true;
     o.datatype = "uinteger";
     o.depends("ss_network", "grpc");
 
