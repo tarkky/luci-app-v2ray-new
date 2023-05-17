@@ -18,9 +18,14 @@ return L.view.extend<SectionItem[][]>({
     return Promise.all([
       v2ray.getSections("routing_rule"),
       v2ray.getSections("routing_balancer", "tag"),
+      v2ray.getSections("outbound", "tag"),
     ]);
   },
-  render: function ([routingRules = [], routingBalancers = []] = []) {
+  render: function ([
+    routingRules = [],
+    routingBalancers = [],
+    outBoundSections = [],
+  ] = []) {
     const m = new form.Map(
       "v2ray",
       "%s - %s".format(_("V2Ray"), _("Routing")),
@@ -45,6 +50,14 @@ return L.view.extend<SectionItem[][]>({
     o.value("AsIs");
     o.value("IPIfNonMatch");
     o.value("IPOnDemand");
+
+    o = s1.option(
+      form.ListValue,
+      "domain_matcher",
+      _("Domain name matching algorithm")
+    );
+    o.value("linear");
+    o.value("mph");
 
     o = s1.option(
       form.MultiValue,
@@ -114,11 +127,27 @@ return L.view.extend<SectionItem[][]>({
     o = s2.option(form.Value, "attrs", _("Attrs"));
     o.modalonly = true;
 
-    o = s2.option(form.Value, "outbound_tag", _("Outbound tag"));
+    o = s2.option(form.ListValue, "outbound_tag", _("Outbound tag"));
+    o.value("");
+    for (const s of outBoundSections) {
+      o.value(s.caption);
+    }
 
-    o = s2.option(form.Value, "balancer_tag", _("Balancer tag"));
-    o.modalonly = true;
+    o = s2.option(form.ListValue, "balancer_tag", _("Balancer tag"));
     o.depends("outbound_tag", "");
+    o.value("");
+    for (const s of routingBalancers) {
+      o.value(s.caption);
+    }
+
+    o = s2.option(
+      form.ListValue,
+      "domain_matcher_r",
+      _("Domain name matching algorithm")
+    );
+    o.value("");
+    o.value("linear");
+    o.value("mph");
 
     const s3 = m.section(
       form.TypedSection,
@@ -130,6 +159,11 @@ return L.view.extend<SectionItem[][]>({
 
     o = s3.option(form.Value, "tag", _("Tag"));
     o.rmempty = false;
+
+    o = s3.option(form.ListValue, "strategy_type", _("Balancer strategy"));
+    o.value("random");
+    o.value("leastPing");
+    o.modalonly = true;
 
     o = s3.option(form.DynamicList, "selector", _("Selector"));
 

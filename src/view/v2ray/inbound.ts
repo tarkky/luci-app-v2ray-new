@@ -58,6 +58,8 @@ return L.view.extend<string[]>({
     o.value("shadowsocks", "Shadowsocks");
     o.value("socks", "Socks");
     o.value("vmess", "VMess");
+    // o.value("trojan", "Trojan");// Add Trojan Protocol support
+    // o.value("vless", "VLESS"); // Add VLESS Protocol support
 
     // Settings - Dokodemo-door
     o = s.taboption(
@@ -319,6 +321,19 @@ return L.view.extend<string[]>({
 
     o = s.taboption(
       "general",
+      form.ListValue,
+      "s_socks_version",
+      "%s - %s".format("Socks", _("Version"))
+    );
+    o.value("");
+    o.value("4", "v4");
+    o.value("4a", "v4a");
+    o.value("5", "v5");
+    o.modalonly = true;
+    o.depends("protocol", "socks");
+
+    o = s.taboption(
+      "general",
       form.Flag,
       "s_socks_udp",
       "%s - %s".format("Socks", _("UDP"))
@@ -354,6 +369,36 @@ return L.view.extend<string[]>({
     o.depends("protocol", "socks");
     o.datatype = "uinteger";
 
+    // Settings - Trojan
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_trojan_address",
+      "%s - %s".format("Trojan", _("Address"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "trojan");
+    o.datatype = "host";
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_trojan_port",
+      "%s - %s".format("Trojan", _("Port"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "trojan");
+    o.datatype = "port";
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_trojan_password",
+      "%s - %s".format("Trojan", _("Password"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "trojan");
+
     // Settings - VMess
     o = s.taboption(
       "general",
@@ -364,15 +409,15 @@ return L.view.extend<string[]>({
     o.modalonly = true;
     o.depends("protocol", "vmess");
 
-    o = s.taboption(
-      "general",
-      form.Value,
-      "s_vmess_client_alter_id",
-      "%s - %s".format("VMess", _("Client alter ID"))
-    );
-    o.modalonly = true;
-    o.depends("protocol", "vmess");
-    o.datatype = "and(min(0), max(65535))";
+    // o = s.taboption(
+    //   "general",
+    //   form.Value,
+    //   "s_vmess_client_alter_id",
+    //   "%s - %s".format("VMess", _("Client alter ID"))
+    // );
+    // o.modalonly = true;
+    // o.depends("protocol", "vmess");
+    // o.datatype = "and(min(0), max(65535))";
 
     o = s.taboption(
       "general",
@@ -393,15 +438,15 @@ return L.view.extend<string[]>({
     o.depends("protocol", "vmess");
     o.datatype = "uinteger";
 
-    o = s.taboption(
-      "general",
-      form.Value,
-      "s_vmess_default_alter_id",
-      "%s - %s".format("VMess", _("Default alter ID"))
-    );
-    o.modalonly = true;
-    o.depends("protocol", "vmess");
-    o.datatype = "and(min(0), max(65535))";
+    // o = s.taboption(
+    //   "general",
+    //   form.Value,
+    //   "s_vmess_default_alter_id",
+    //   "%s - %s".format("VMess", _("Default alter ID"))
+    // );
+    // o.modalonly = true;
+    // o.depends("protocol", "vmess");
+    // o.datatype = "and(min(0), max(65535))";
 
     o = s.taboption(
       "general",
@@ -434,6 +479,56 @@ return L.view.extend<string[]>({
     o.modalonly = true;
     o.depends("protocol", "vmess");
 
+    // Settings - VLESS
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_vless_address",
+      "%s - %s".format("VLESS", _("Address"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "vless");
+    o.datatype = "host";
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_vless_port",
+      "%s - %s".format("VLESS", _("Port"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "vless");
+    o.datatype = "port";
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_vless_user_id",
+      "%s - %s".format("VLESS", _("User ID"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "vless");
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_vless_user_level",
+      "%s - %s".format("VLESS", _("User level"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "vless");
+    o.datatype = "and(uinteger, max(10))";
+
+    o = s.taboption(
+      "general",
+      form.ListValue,
+      "s_vless_user_encryption",
+      "%s - %s".format("VLESS", _("Encryption"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "vless");
+    o.value("none", "none");
+
     /** Stream Settings  **/
     o = s.taboption("stream", form.ListValue, "ss_network", _("Network"));
     o.value("");
@@ -449,6 +544,26 @@ return L.view.extend<string[]>({
     o.value("");
     o.value("none", _("None"));
     o.value("tls", "TLS");
+
+    // XTLS Flows
+    o = s.taboption(
+      "stream",
+      form.ListValue,
+      "s_xtls_flow",
+      _("xTLS Flow"),
+      _("Use xTLS flow")
+    );
+    o.modalonly = true;
+    o.value("none", _("None"));
+    o.value("xtls-rprx-direct");
+    o.value("xtls-rprx-direct-udp443");
+    o.value("xtls-rprx-origin");
+    o.value("xtls-rprx-origin-udp443");
+    o.value("xtls-rprx-splice");
+    o.value("xtls-rprx-splice-udp443");
+    o.value("xtls-rprx-vision");
+    o.value("xtls-rprx-vision-udp443");
+    o.depends("ss_security", "tls");
 
     // Stream Settings - TLS
     o = s.taboption(
@@ -470,6 +585,24 @@ return L.view.extend<string[]>({
     o.modalonly = true;
     o.depends("ss_security", "tls");
     o.placeholder = "http/1.1";
+
+    //uTLS
+    o = s.taboption("stream", form.ListValue, "u_tls", "uTLS");
+    o.modalonly = true;
+    o.value("", _("None"));
+    o.value("chrome");
+    o.value("firefox");
+    o.value("safari");
+    o.value("randomized");
+    o.depends("ss_security", "tls");
+
+    o = s.taboption(
+      "stream",
+      form.Flag,
+      "ss_tls_rejectUnknownSni",
+      "%s - %s".format("TLS", _("Reject Unknown SNI"))
+    );
+    o.modalonly = true;
 
     o = s.taboption(
       "stream",
@@ -857,6 +990,14 @@ return L.view.extend<string[]>({
 
     o = s.taboption(
       "other",
+      form.Flag,
+      "routeOnly_enabled",
+      "%s - %s".format(_("routeOnly"), _("Enabled"))
+    );
+    o.modalonly = true;
+
+    o = s.taboption(
+      "other",
       form.MultiValue,
       "sniffing_dest_override",
       "%s - %s".format(_("Sniffing"), _("Dest override"))
@@ -864,6 +1005,16 @@ return L.view.extend<string[]>({
     o.modalonly = true;
     o.value("http");
     o.value("tls");
+    o.value("fakedns");
+    o.value("fakedns+others");
+
+    o = s.taboption(
+      "other",
+      form.Flag,
+      "metadata_only",
+      "%s - %s".format(_("metadata only"), _("Enabled"))
+    );
+    o.modalonly = true;
 
     o = s.taboption(
       "other",

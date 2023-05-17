@@ -50,7 +50,7 @@ return L.view.extend<string[]>({
       uci.set("v2ray", sid, "s_vmess_address", address);
       uci.set("v2ray", sid, "s_vmess_port", port);
       uci.set("v2ray", sid, "s_vmess_user_id", vmess.id || "");
-      uci.set("v2ray", sid, "s_vmess_user_alter_id", vmess.aid || "");
+      // uci.set("v2ray", sid, "s_vmess_user_alter_id", vmess.aid || "");
       uci.set("v2ray", sid, "ss_security", tls);
 
       let hosts: string[] = [];
@@ -232,9 +232,12 @@ return L.view.extend<string[]>({
     ]);
   },
   load: function () {
-    return v2ray.getLocalIPs();
+    return Promise.all([
+      v2ray.getLocalIPs(),
+      //v2ray.getSections("inbound", "tag"),
+    ]);
   },
-  render: function (localIPs: string[] = []) {
+  render: function ([localIPs = []]) {
     const m = new form.Map(
       "v2ray",
       "%s - %s".format(_("V2Ray"), _("Outbound"))
@@ -274,7 +277,10 @@ return L.view.extend<string[]>({
     o.value("mtproto", "MTProto");
     o.value("shadowsocks", "Shadowsocks");
     o.value("socks", "Socks");
+    o.value("trojan", "Trojan");
     o.value("vmess", "VMess");
+    o.value("vless", "VLESS"); // Add VLESS Protocol support
+    o.value("loopback", "Loopback"); // Add Loopback Protocol support
 
     // Settings Blackhole
     o = s.taboption(
@@ -522,6 +528,36 @@ return L.view.extend<string[]>({
     o.depends("protocol", "socks");
     o.datatype = "uinteger";
 
+    // Settings - Trojan
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_trojan_address",
+      "%s - %s".format("Trojan", _("Address"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "trojan");
+    o.datatype = "host";
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_trojan_port",
+      "%s - %s".format("Trojan", _("Port"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "trojan");
+    o.datatype = "port";
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_trojan_password",
+      "%s - %s".format("Trojan", _("Password"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "trojan");
+
     // Settings - VMess
     o = s.taboption(
       "general",
@@ -552,15 +588,15 @@ return L.view.extend<string[]>({
     o.modalonly = true;
     o.depends("protocol", "vmess");
 
-    o = s.taboption(
-      "general",
-      form.Value,
-      "s_vmess_user_alter_id",
-      "%s - %s".format("VMess", _("Alter ID"))
-    );
-    o.modalonly = true;
-    o.depends("protocol", "vmess");
-    o.datatype = "and(uinteger, max(65535))";
+    // o = s.taboption(
+    //   "general",
+    //   form.Value,
+    //   "s_vmess_user_alter_id",
+    //   "%s - %s".format("VMess", _("Alter ID"))
+    // );
+    // o.modalonly = true;
+    // o.depends("protocol", "vmess");
+    // o.datatype = "and(uinteger, max(65535))";
 
     o = s.taboption(
       "general",
@@ -586,6 +622,70 @@ return L.view.extend<string[]>({
     o.depends("protocol", "vmess");
     o.datatype = "uinteger";
 
+    // Settings - VLESS
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_vless_address",
+      "%s - %s".format("VLESS", _("Address"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "vless");
+    o.datatype = "host";
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_vless_port",
+      "%s - %s".format("VLESS", _("Port"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "vless");
+    o.datatype = "port";
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_vless_user_id",
+      "%s - %s".format("VLESS", _("User ID"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "vless");
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_vless_user_level",
+      "%s - %s".format("VLESS", _("User level"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "vless");
+    o.datatype = "and(uinteger, max(10))";
+
+    o = s.taboption(
+      "general",
+      form.ListValue,
+      "s_vless_user_encryption",
+      "%s - %s".format("VLESS", _("Encryption"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "vless");
+    o.value("none", "none");
+
+    // Settings Loopback
+
+    o = s.taboption(
+      "general",
+      form.Value,
+      "s_loopback_inboundtag",
+      "%s - %s".format("Loopback", _("Inbound tag"))
+    );
+    o.modalonly = true;
+    o.depends("protocol", "loopback");
+    // for (const s in inboundSections) {
+    //   o.value(s.caption, s.caption);
+    // }
+
     /** Stream Settings **/
     o = s.taboption("stream", form.ListValue, "ss_network", _("Network"));
     o.value("");
@@ -595,12 +695,61 @@ return L.view.extend<string[]>({
     o.value("http", "HTTP/2");
     o.value("domainsocket", "Domain Socket");
     o.value("quic", "QUIC");
+    o.value("grpc", "gRPC"); // add gRPC
 
     o = s.taboption("stream", form.ListValue, "ss_security", _("Security"));
     o.modalonly = true;
-    o.value("");
     o.value("none", _("None"));
     o.value("tls", "TLS");
+
+    // XTLS Flows
+    o = s.taboption(
+      "stream",
+      form.ListValue,
+      "s_xtls_flow",
+      _("xTLS Flow"),
+      _("Use xTLS flow")
+    );
+    o.modalonly = true;
+    o.value("none", _("None"));
+    o.value("xtls-rprx-direct");
+    o.value("xtls-rprx-direct-udp443");
+    o.value("xtls-rprx-origin");
+    o.value("xtls-rprx-origin-udp443");
+    o.value("xtls-rprx-splice");
+    o.value("xtls-rprx-splice-udp443");
+    o.value("xtls-rprx-vision");
+    o.value("xtls-rprx-vision-udp443");
+    o.depends("ss_security", "tls");
+
+    // TLS Version
+    o = s.taboption(
+      "stream",
+      form.ListValue,
+      "min_tls_version",
+      _("min TLS version")
+    );
+    o.modalonly = true;
+    o.value("", _("Default"));
+    o.value("1.0");
+    o.value("1.1");
+    o.value("1.2");
+    o.value("1.3");
+    o.depends("ss_security", "tls");
+
+    o = s.taboption(
+      "stream",
+      form.ListValue,
+      "max_tls_version",
+      _("max TLS version")
+    );
+    o.modalonly = true;
+    o.value("", _("Default"));
+    o.value("1.0");
+    o.value("1.1");
+    o.value("1.2");
+    o.value("1.3");
+    o.depends("ss_security", "tls");
 
     // Stream Settings - TLS
     o = s.taboption(
@@ -614,13 +763,32 @@ return L.view.extend<string[]>({
 
     o = s.taboption(
       "stream",
-      form.Value,
+      form.DynamicList,
       "ss_tls_alpn",
       "%s - %s".format("TLS", "ALPN")
     );
     o.modalonly = true;
     o.depends("ss_security", "tls");
     o.placeholder = "http/1.1";
+
+    //uTLS
+    o = s.taboption("stream", form.ListValue, "u_tls", "uTLS");
+    o.modalonly = true;
+    o.value("", _("None"));
+    o.value("chrome");
+    o.value("firefox");
+    o.value("safari");
+    o.value("randomized");
+    o.depends("ss_security", "tls");
+
+    o = s.taboption(
+      "stream",
+      form.Flag,
+      "ss_tls_rejectUnknownSni",
+      "%s - %s".format("TLS", _("Reject Unknown SNI"))
+    );
+    o.depends("ss_security", "tls");
+    o.modalonly = true;
 
     o = s.taboption(
       "stream",
@@ -662,23 +830,23 @@ return L.view.extend<string[]>({
     o.value("verify");
     o.value("issue");
 
-    o = s.taboption(
-      "stream",
-      form.Value,
-      "ss_tls_cert_fiile",
-      "%s - %s".format("TLS", _("Certificate file"))
-    );
-    o.modalonly = true;
-    o.depends("ss_security", "tls");
+    // o = s.taboption(
+    //   "stream",
+    //   form.Value,
+    //   "ss_tls_cert_fiile",
+    //   "%s - %s".format("TLS", _("Certificate file"))
+    // );
+    // o.modalonly = true;
+    // o.depends("ss_security", "tls");
 
-    o = s.taboption(
-      "stream",
-      form.Value,
-      "ss_tls_key_file",
-      "%s - %s".format("TLS", _("Key file"))
-    );
-    o.modalonly = true;
-    o.depends("ss_security", "tls");
+    // o = s.taboption(
+    //   "stream",
+    //   form.Value,
+    //   "ss_tls_key_file",
+    //   "%s - %s".format("TLS", _("Key file"))
+    // );
+    // o.modalonly = true;
+    // o.depends("ss_security", "tls");
 
     // Stream Settings - TCP
     o = s.taboption(
@@ -962,6 +1130,63 @@ return L.view.extend<string[]>({
     o.value("wechat-video", _("Wechat Video"));
     o.value("dtls", "DTLS 1.2");
     o.value("wireguard", "WireGuard");
+
+    // Stream Settings - gRPC
+    o = s.taboption(
+      "stream",
+      form.Value,
+      "service_name",
+      "%s - %s".format("gRPC", _("Service name"))
+    );
+    o.depends("ss_network", "grpc");
+    o.modalonly = true;
+    o = s.taboption(
+      "stream",
+      form.Flag,
+      "multi_mode",
+      "%s - %s".format("gRPC", _("Multi mode"))
+    );
+    o.modalonly = true;
+    o.depends("ss_network", "grpc");
+
+    o = s.taboption(
+      "stream",
+      form.Value,
+      "idle_timeout",
+      "%s - %s".format("gRPC", _("Idle timeout"))
+    );
+    o.modalonly = true;
+    o.datatype = "uinteger";
+    o.depends("ss_network", "grpc");
+
+    o = s.taboption(
+      "stream",
+      form.Value,
+      "health_check_timeout",
+      "%s - %s".format("gRPC", _("Health check timeout"))
+    );
+    o.modalonly = true;
+    o.datatype = "uinteger";
+    o.depends("ss_network", "grpc");
+
+    o = s.taboption(
+      "stream",
+      form.Flag,
+      "permit_without_stream",
+      "%s - %s".format("gRPC", _("Permit without stream"))
+    );
+    o.modalonly = true;
+    o.depends("ss_network", "grpc");
+
+    o = s.taboption(
+      "stream",
+      form.Value,
+      "initial_windows_size",
+      "%s - %s".format("gRPC", _("Initial windows size"))
+    );
+    o.modalonly = true;
+    o.datatype = "uinteger";
+    o.depends("ss_network", "grpc");
 
     // Stream Settings - Socket Options
     o = s.taboption(
