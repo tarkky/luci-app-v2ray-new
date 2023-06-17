@@ -4,6 +4,7 @@ Luci support for V2Ray
 
 *Available for OpenWrt 21.02 and later.*
 
+[![Liberapay patrons](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/robertlu/donate)
 [![Release Version](https://img.shields.io/github/release/robberphex/luci-app-v2ray.svg)](https://github.com/robberphex/luci-app-v2ray/releases/latest)
 [![Latest Release Download](https://img.shields.io/github/downloads/robberphex/luci-app-v2ray/latest/total.svg)](https://github.com/robberphex/luci-app-v2ray/releases/latest)
 [![Total Download](https://img.shields.io/github/downloads/robberphex/luci-app-v2ray/total.svg)](https://github.com/robberphex/luci-app-v2ray/releases)
